@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Deadlock — Random Items</title>
+  <style>
+    body { background:#0e0e11; color:#eaeaf0; font-family:Arial,Helvetica,sans-serif; margin:0; padding:20px }
+    h1 { margin-bottom:6px }
+    .controls { background:#17171c; padding:15px; border-radius:10px; margin-bottom:20px; display:flex; gap:15px; flex-wrap:wrap; align-items:center }
+    .controls input,.controls select,.controls button { background:#222230; color:#fff; border:none; border-radius:6px; padding:6px 10px }
+    .controls button { cursor:pointer; font-weight:bold }
+    .controls button:hover { background:#2e2e44 }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:15px }
+    .item { background:#17171c; border-radius:12px; padding:10px; text-align:center }
+    .item img { width:96px; height:96px; object-fit:contain; margin-bottom:8px }
+    .item-name { font-size:14px; font-weight:bold }
+    .item-type { font-size:12px; opacity:.7 }
+    .status { opacity:.7; font-size:13px; margin-bottom:10px }
+  </style>
+</head>
+<body>
+  <h1>🎲 Deadlock — рандом всех предметов</h1>
+  <div class="status" id="status">Загрузка базы предметов…</div>
+
+  <div class="controls">
+    <label>Количество:
+      <input type="number" id="count" value="10" min="1" max="20" />
+    </label>
+
+    <label>Тип:
+      <select id="filterType">
+        <option value="all">Все</option>
+        <option value="weapon">Weapon</option>
+        <option value="survival">Survival</option>
+        <option value="spirit">Spirit</option>
+        <option value="active">Active</option>
+      </select>
+    </label>
+
+    <label>
+      <input type="checkbox" id="noRepeat" checked /> без повторов
+    </label>
+
+    <button onclick="randomize()">Сгенерировать</button>
+  </div>
+
+  <div id="result" class="grid"></div>
+
+  <script>
+    // ⚠️ ВСЕ предметы подгружаются автоматически с deadlockdb
+    // Ничего вручную добавлять не нужно
+
+    let items = [];
+
+    async function loadItems() {
+      try {
+        // ✅ основной источник: GitHub raw (без CORS)
+        const res = await fetch('https://raw.githubusercontent.com/deadlockdb/deadlockdb-data/main/items.json');
+        const data = await res.json();
+
+        items = data.map(i => ({
+          name: i.name,
+          type: (i.category || 'other').toLowerCase(),
+          img: i.icon
+        }));
+
+        document.getElementById('status').innerText = `Загружено предметов: ${items.length}`;
+      } catch (e) {
+        console.error(e);
+        document.getElementById('status').innerText = '❌ Не удалось загрузить базу предметов (проверь интернет)';
+      }
+    }
+
+    loadItems();
+  </script>
+</body>
+</html>
